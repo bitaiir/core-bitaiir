@@ -1,5 +1,5 @@
 # Imports
-from functions.Debug import Debug
+from tools.Debug import Debug
 from core.Core import Core
 
 class Main:
