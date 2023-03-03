@@ -1,8 +1,7 @@
 # Imports
-from network.peers.Peer import Peer
+from network.peers.PeerClient import PeerClient
 from network.peers import Params
 from tools.Debug import Debug
-import socket
 import time
 
 
@@ -15,11 +14,23 @@ class PeerManager:
             return
         for peer in self.peers:
             if peer.address == address:
+                Debug.log("Address is equal")
                 return
+
+        # Create peer;
+        peerClient = PeerClient(address)
+
+        # Connect peer;
+        peerClient.connect()
+
+        # Send message to verify peer in network/protocol;
+
         Debug.log("Adding Peer: {0}".format(str(address)))
-        peer = Peer(address)
-        peer.connect()
-        self.peers.append(peer)
+
+        self.peers.append(peerClient)
+
+        # for peer in self.peers:
+        #     Debug.log("Peers: {0}".format(str(peer)))
 
     def send_all(self, message):
         for peer in self.peers:
@@ -46,7 +57,10 @@ class PeerManager:
             if now - peer.last_ping > Params.PING_INTERVAL:
                 try:
                     peer.send_message("ping")
+                    time.sleep(1)
                     peer.receive_message()
+                    time.sleep(1)
                     peer.last_ping = now
-                except:
+                except Exception as error:
+                    Debug.error("[PING] Peer Address {0} removed! Error: {1}.".format(str(peer.address), str(error)))
                     self.peers.remove(peer)

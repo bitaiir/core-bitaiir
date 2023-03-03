@@ -1,10 +1,8 @@
 # Imports
-from network.peers import Params
-from tools.LocalAddress import LocalAddress
 from network.peers.PeerDiscovery import PeerDiscovery
 from network.peers.PeerManager import PeerManager
+from network.peers.PeerServer import PeerServer
 from tools.Debug import Debug
-import socket
 import threading
 import time
 
@@ -14,47 +12,41 @@ class Node:
     def __init__(self):
 
         # Objects;
-        local_address = LocalAddress()
-
-        # Get local IPv4;
-        local_ip = local_address.getLocalAddress()
-
-        # # Add peer;
-        # peer_manager.add_peer((local_ip, Params.DEFAULT_PORT))
-
-        # Create socket;
-        self.peer_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.peer_server = PeerServer()
 
         # Bind socket;
-        self.peer_socket.bind((local_ip, Params.DEFAULT_PORT))
+        self.peer_server.bind_socket()
 
-        # Debug
-        Debug.log("Socket listening in {0}:{1}".format(str(local_ip), str(Params.DEFAULT_PORT)))
-
-        # Socket listen;
-        self.peer_socket.listen()
+        # Listen socket;
+        self.peer_server.listen_connection()
 
         # Threading for listening new peers;
-        t = threading.Thread(target=self.listen_for_peers)
-        t.start()
+        thread_listen_for_peers = threading.Thread(target=self.accept_peers)
 
-    def listen_for_peers(self):
+        # Threading for search new peers;
+        thread_search_peers = threading.Thread(target=self.search_peers)
+
+        # Start threads;
+        thread_listen_for_peers.start()
+        thread_search_peers.start()
+
+    def accept_peers(self):
 
         Debug.log("Listening for peers...")
 
         while True:
-            # Wait connection;
-            connection, address = self.peer_socket.accept()
+            # Accept socket connection;
+            connection, address = self.peer_server.accept_connection()
 
             # Debug log;
             Debug.log("New connection: {0}".format(str(address)))
 
-            # Processing new connection;
-            # Aqui você pode adicionar a lógica específica do seu programa para lidar com as mensagens do protocolo do Bitcoin
-            # e sincronizar a blockchain com outros peers
+            # Receive message for peer verification;
+            self.peer_server.receive_message()
 
     def search_peers(self):
 
+        # Objects;
         peer_manager = PeerManager()
         peer_discovery = PeerDiscovery()
 
@@ -63,7 +55,7 @@ class Node:
             for address in new_peers:
                 peer_manager.add_peer(address)
             peer_manager.ping_all()
-            time.sleep(1)
+            time.sleep(2)
 
 
 if __name__ == "__main__":
