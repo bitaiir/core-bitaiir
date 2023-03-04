@@ -62,7 +62,10 @@ class Node:
 
             if not error:
                 peer_manager.ping_all()
+
                 time.sleep(2)
+
+                peer_manager.send_messagel("bitaiir")
 
 
 if __name__ == "__main__":

@@ -54,17 +54,21 @@ class PeerServer:
         Debug.log("Send message: [ {0} ] | Bytes message: [ {1} ].".format(str(message), str(message_bytes)))
 
     def receive_message(self):
-        magic = self.socket.recv(7)
-        Debug.log("Receive magic message: [ {0} ]. | Bytes message: [ {1} ].".format(str(magic.decode("ascii"), str(magic))))
+        try:
+            magic = self.socket.recv(7)
 
-        if magic != Params.MAGIC_BYTES:
-            raise ValueError("Invalid magic bytes")
+            Debug.log("Receive magic message: [ {0} ]. | Bytes message: [ {1} ].".format(str(magic.decode("ascii"), str(magic))))
 
-        length = int.from_bytes(self.socket.recv(7), byteorder='little')
-        message = self.socket.recv(length)
-        Debug.log("Receive message decode: [ {0} ].".format(str(message.decode('ascii'))))
+            if magic != Params.MAGIC_BYTES:
+                raise ValueError("Invalid magic bytes")
 
-        return message.decode('ascii')
+            length = int.from_bytes(self.socket.recv(7), byteorder='little')
+            message = self.socket.recv(length)
+            Debug.log("Receive message decode: [ {0} ].".format(str(message.decode('ascii'))))
+
+            return message.decode('ascii')
+        except Exception as error:
+            Debug.error("Receive: {0}.".format(str(error)))
 
     def close(self):
         self.socket.close()

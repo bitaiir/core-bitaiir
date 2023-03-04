@@ -52,14 +52,14 @@ class PeerManager:
 
         return error
 
-    def send_all(self, message):
+    def send_messagel(self, message):
         for peer in self.peers:
             try:
                 peer.send_message(message)
             except:
                 self.peers.remove(peer)
 
-    def receive_all(self):
+    def receive_message(self):
         messages = []
         for peer in self.peers:
             try:
