@@ -18,6 +18,11 @@ class PeerManager:
         # Get local IPv4;
         external_ip = external_address.getExternalAddress()
 
+        if address[0] == external_ip:
+            Debug.error("Your public IPv4 is equal in peer list!")
+            error = True
+            return error
+
         if len(self.peers) >= Params.MAX_PEERS:
             error = True
             return error
@@ -26,11 +31,6 @@ class PeerManager:
                 Debug.error("Address is equal")
                 error = True
                 return error
-            if peer.address[0] == external_address:
-                Debug.error("Your public IPv4 is equal in peer list!")
-                error = True
-                return error
-
 
         # Create peer;
         peerClient = PeerClient(address)
