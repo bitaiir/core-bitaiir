@@ -19,7 +19,7 @@ class PeerManager:
         external_ip = external_address.getExternalAddress()
 
         if address[0] == external_ip:
-            Debug.error("Your public IPv4 is equal in peer list!")
+            # Debug.error("Your public IPv4 is equal in peer list!")
             error = True
             return error
 

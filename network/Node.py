@@ -58,6 +58,7 @@ class Node:
 
             for address in new_peers:
                 error = peer_manager.add_peer(address)
+                time.sleep(2)
 
             if not error:
                 peer_manager.ping_all()
