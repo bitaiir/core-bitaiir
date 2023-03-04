@@ -57,7 +57,7 @@ class Node:
             new_peers = peer_discovery.discover_peers()
 
             for address in new_peers:
-                peer_manager.add_peer(address)
+                error = peer_manager.add_peer(address)
 
             if not error:
                 peer_manager.ping_all()

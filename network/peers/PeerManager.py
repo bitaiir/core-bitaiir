@@ -1,6 +1,7 @@
 # Imports
 from network.peers.PeerClient import PeerClient
 from network.peers import Params
+from tools.LocalAddress import LocalAddress
 from tools.Debug import Debug
 import time
 
@@ -11,14 +12,25 @@ class PeerManager:
 
     def add_peer(self, address):
 
+        # Objects;
+        local_address = LocalAddress()
+
+        # Get local IPv4;
+        local_ip = local_address.getLocalAddress()
+
         if len(self.peers) >= Params.MAX_PEERS:
             error = True
             return error
         for peer in self.peers:
             if peer.address == address:
-                Debug.log("Address is equal")
+                Debug.error("Address is equal")
                 error = True
                 return error
+            elif peer.address == local_ip:
+                Debug.error("Local IPv4 is equal in peer list!")
+                error = True
+                return error
+
 
         # Create peer;
         peerClient = PeerClient(address)
@@ -35,6 +47,10 @@ class PeerManager:
         Debug.log("Adding Peer: {0}".format(str(address)))
 
         self.peers.append(peerClient)
+
+        error = False
+
+        return error
 
     def send_all(self, message):
         for peer in self.peers:
