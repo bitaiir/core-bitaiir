@@ -26,7 +26,7 @@ class PeerManager:
                 Debug.error("Address is equal")
                 error = True
                 return error
-            if peer.address == external_address:
+            if peer.address[0] == external_address:
                 Debug.error("Your public IPv4 is equal in peer list!")
                 error = True
                 return error
