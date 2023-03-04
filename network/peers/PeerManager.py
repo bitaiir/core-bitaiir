@@ -10,27 +10,31 @@ class PeerManager:
         self.peers = []
 
     def add_peer(self, address):
+
         if len(self.peers) >= Params.MAX_PEERS:
-            return
+            error = True
+            return error
         for peer in self.peers:
             if peer.address == address:
                 Debug.log("Address is equal")
-                return
+                error = True
+                return error
 
         # Create peer;
         peerClient = PeerClient(address)
 
-        # Connect peer;
-        peerClient.connect()
+        try:
+            # Connect peer;
+            peerClient.connect()
 
-        # Send message to verify peer in network/protocol;
+        except Exception as error:
+            Debug.error("Connect to {0}: {1}".format(str(address), str(error)))
+            error = True
+            return error
 
         Debug.log("Adding Peer: {0}".format(str(address)))
 
         self.peers.append(peerClient)
-
-        # for peer in self.peers:
-        #     Debug.log("Peers: {0}".format(str(peer)))
 
     def send_all(self, message):
         for peer in self.peers:

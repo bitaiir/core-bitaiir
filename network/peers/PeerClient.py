@@ -11,13 +11,9 @@ class PeerClient:
         self.last_ping = 0
 
     def connect(self):
-        try:
-            self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            self.socket.settimeout(5)
-            self.socket.connect(self.address)
-            #self.socket.connect((self.address, Params.DEFAULT_PORT))
-        except Exception as error:
-            Debug.error("Connect: {0}".format(str(error)))
+        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.socket.settimeout(5)
+        self.socket.connect(self.address)
 
     def send_message(self, message):
         message_bytes = Params.MAGIC_BYTES + message.encode("ascii")

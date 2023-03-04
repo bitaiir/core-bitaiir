@@ -51,11 +51,17 @@ class Node:
         peer_discovery = PeerDiscovery()
 
         while True:
+            # Vars;
+            error = False
+
             new_peers = peer_discovery.discover_peers()
+
             for address in new_peers:
                 peer_manager.add_peer(address)
-            peer_manager.ping_all()
-            time.sleep(2)
+
+            if not error:
+                peer_manager.ping_all()
+                time.sleep(2)
 
 
 if __name__ == "__main__":
