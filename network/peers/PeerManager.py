@@ -10,7 +10,16 @@ class PeerManager:
     def __init__(self):
         self.peers = []
 
-    def add_peer(self, address):
+    def add_peer(self, address, peer_type):
+
+        # Vars;
+        connect_error = False
+
+        # Get IP address;
+        ip_address = address[0]
+
+        # Get port;
+        port_address = address[1]
 
         # Create peer;
         peer = Peer(address)
@@ -30,10 +39,10 @@ class PeerManager:
                     return Debug.error("Peer address: {0} is equal to new peer: {1}!".format(str(peer.address), str(address)))
 
             # Debug;
-            Debug.log("Ping command start in {0}.".format(str(address[0])))
+            Debug.log("Ping command start in {0}.".format(str(ip_address)))
 
             # Ping peer;
-            ping_result = self.ping(address[0])
+            ping_result = self.ping(ip_address)
 
             if not ping_result:
                 # Ping error;
@@ -48,13 +57,17 @@ class PeerManager:
                 # Debug;
                 Debug.log("Ping sucess.")
 
-                # Connect peer;
-                connect_error = peer.connect()
+                if peer_type == "discovery":
+                    # Connect peer;
+                    connect_error = peer.connect()
 
                 if not connect_error:
 
-                    # Verify peer network protocol;
-                    status_peer = self.verify_peer(peer)
+                    if peer_type == "discovery":
+                        # Verify peer network protocol;
+                        status_peer = self.verify_peer(peer, "discovery")
+                    else:
+                        status_peer = self.verify_peer(peer, "listen")
 
                     if status_peer:
 
@@ -67,18 +80,20 @@ class PeerManager:
                     else:
                         Debug.error("Status peer error!")
 
-    def verify_peer(self, peer):
+    def verify_peer(self, peer, peer_type):
         # Vars;
         status_peer = True
 
-        # Send message;
-        peer.send_message("bitaiir")
+        if peer_type == "discovery":
 
-        # Receive message;
-        received_message = peer.receive_message()
+            # Receive message;
+            received_message = peer.receive_message()
 
-        if received_message != "bitaiir":
-            status_peer = False
+            if received_message != "bitaiir":
+                status_peer = False
+        else:
+            # Send message;
+            peer.send_message("bitaiir")
 
         return status_peer
 

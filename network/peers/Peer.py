@@ -79,7 +79,13 @@ class Peer:
             Debug.error("Receive: {0}.".format(str(error)))
 
     def close(self):
-        self.socket.close()
+        try:
+            # Close sockets;
+            self.socket.close()
+            self.socket_listen.close()
+
+        except Exception as error:
+            Debug.error("Close: {0}.".format(str(error)))
 
 # Socket Listen #
 
@@ -124,3 +130,30 @@ class Peer:
 
         except Exception as error:
             Debug.error("Accept: {0}".format(str(error)))
+
+    def send_message_listen(self, message):
+        message_bytes = Params.MAGIC_BYTES + message.encode("ascii")
+
+        self.socket_listen.send(message_bytes)
+
+        Debug.log("Send message: [ {0} ] | Bytes message: [ {1} ].".format(str(message), str(message_bytes)))
+
+    def receive_message_listen(self):
+        try:
+            magic = self.socket_listen.recv(7)
+
+            Debug.log("Receive magic message: [ {0} ]. | Bytes message: [ {1} ].".format(str(magic.decode("ascii"), str(magic))))
+
+            if magic != Params.MAGIC_BYTES:
+                raise ValueError("Invalid magic bytes")
+
+            length = int.from_bytes(self.socket_listen.recv(7), byteorder="little")
+
+            message = self.socket_listen.recv(length)
+
+            Debug.log("Receive message decode: [ {0} ].".format(str(message.decode("ascii"))))
+
+            return message.decode("ascii")
+
+        except Exception as error:
+            Debug.error("Receive: {0}.".format(str(error)))

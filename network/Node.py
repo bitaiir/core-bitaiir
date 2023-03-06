@@ -5,6 +5,7 @@ from network.peers.PeerManager import PeerManager
 from network.peers.PeerListen import PeerListen
 import threading
 import pyfiglet
+import time
 
 
 class Node:
@@ -25,15 +26,12 @@ class Node:
 
         # Start threads;
         thread_listen_peers.start()
+        time.sleep(3)
         thread_discovery_peers.start()
-
-        # Join threads;
-        thread_listen_peers.join()
-        thread_discovery_peers.join()
 
     def start_infos(self):
         # Vars.
-        ascii_logo = pyfiglet.figlet_format("bitaiir", font = "banner3-D" )
+        ascii_logo = pyfiglet.figlet_format("bitaiir", font="banner3-D")
 
         # Debug;
         Debug.art_ascii(ascii_logo)
@@ -68,7 +66,10 @@ class Node:
                 Debug.log("Start add process to new peer address: {0}.".format(address))
 
                 # Add peer;
-                peer_manager.add_peer(address)
+                peer_manager.add_peer(address, "discovery")
+
+            # Sleep;
+            time.sleep(5)
 
 
 if __name__ == "__main__":
