@@ -1,71 +1,74 @@
 # Imports
+from tools.Debug import Debug
 from network.peers.PeerDiscovery import PeerDiscovery
 from network.peers.PeerManager import PeerManager
-from network.peers.PeerServer import PeerServer
-from tools.Debug import Debug
+from network.peers.PeerListen import PeerListen
 import threading
-import time
+import pyfiglet
 
 
 class Node:
 
     def __init__(self):
+        self.discoverying_peers = True
 
-        # Objects;
-        self.peer_server = PeerServer()
+        # Start node;
+        self.start_node()
 
-        # Bind socket;
-        self.peer_server.bind_socket()
-
-        # Listen socket;
-        self.peer_server.listen_connection()
-
-        # Threading for listening new peers;
-        thread_listen_for_peers = threading.Thread(target=self.accept_peers)
+    def start_node(self):
+        # Start informations;
+        self.start_infos()
 
         # Threading for search new peers;
-        thread_search_peers = threading.Thread(target=self.search_peers)
+        thread_listen_peers = threading.Thread(target=self.listen_peers)
+        thread_discovery_peers = threading.Thread(target=self.discovery_peers)
 
         # Start threads;
-        thread_listen_for_peers.start()
-        thread_search_peers.start()
+        thread_listen_peers.start()
+        thread_discovery_peers.start()
 
-    def accept_peers(self):
+        # Join threads;
+        thread_listen_peers.join()
+        thread_discovery_peers.join()
 
-        Debug.log("Listening for peers...")
+    def start_infos(self):
+        # Vars.
+        ascii_logo = pyfiglet.figlet_format("bitaiir", font = "banner3-D" )
 
-        while True:
-            # Accept socket connection;
-            connection, address = self.peer_server.accept_connection()
+        # Debug;
+        Debug.art_ascii(ascii_logo)
 
-            # Debug log;
-            Debug.log("New connection: {0}".format(str(address)))
-
-            # Receive message for peer verification;
-            self.peer_server.receive_message()
-
-    def search_peers(self):
+    def listen_peers(self):
+        # Debug;
+        Debug.info("Starting listen for new peers...")
 
         # Objects;
-        peer_manager = PeerManager()
+        peer_listen = PeerListen()
+
+        # Listen for peers;
+        peer_listen.listen_for_peers()
+
+    def discovery_peers(self):
+
+        # Objects;
         peer_discovery = PeerDiscovery()
+        peer_manager = PeerManager()
 
-        while True:
-            # Vars;
-            error = False
+        # Verifying new peers in DNS seeds;
+        while self.discoverying_peers:
+            # Debug;
+            Debug.info("Starting discovery new peers...")
 
+            # New peers addresses;
             new_peers = peer_discovery.discover_peers()
 
+            # Add new peers;
             for address in new_peers:
-                error = peer_manager.add_peer(address)
-                time.sleep(2)
+                # Debug;
+                Debug.log("Start add process to new peer address: {0}.".format(address))
 
-            if not error:
-                peer_manager.ping_all()
-
-                time.sleep(2)
-
-                peer_manager.send_messagel("bitaiir")
+                # Add peer;
+                peer_manager.add_peer(address)
 
 
 if __name__ == "__main__":

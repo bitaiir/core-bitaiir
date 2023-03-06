@@ -1,5 +1,5 @@
 # Imports
-from network.peers import Params
+from network.peers.tests import Params
 from tools.LocalAddress import LocalAddress
 from tools.Debug import Debug
 import socket
@@ -55,6 +55,8 @@ class PeerServer:
 
     def receive_message(self):
         try:
+            received = True
+
             magic = self.socket.recv(7)
 
             Debug.log("Receive magic message: [ {0} ]. | Bytes message: [ {1} ].".format(str(magic.decode("ascii"), str(magic))))
@@ -69,6 +71,8 @@ class PeerServer:
             return message.decode('ascii')
         except Exception as error:
             Debug.error("Receive: {0}.".format(str(error)))
+            received = False
+            return received
 
     def close(self):
         self.socket.close()

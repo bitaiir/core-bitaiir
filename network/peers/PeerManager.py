@@ -1,8 +1,8 @@
 # Imports
-from network.peers.PeerClient import PeerClient
 from network.peers import Params
-from tools.ExternalAddress import ExternalAddress
+from network.peers.Peer import Peer
 from tools.Debug import Debug
+from tools.Ping import Ping
 import time
 
 
@@ -12,75 +12,85 @@ class PeerManager:
 
     def add_peer(self, address):
 
-        # Objects;
-        external_address = ExternalAddress()
-
-        # Get local IPv4;
-        external_ip = external_address.getExternalAddress()
-
-        if address[0] == external_ip:
-            # Debug.error("Your public IPv4 is equal in peer list!")
-            error = True
-            return error
-
-        if len(self.peers) >= Params.MAX_PEERS:
-            error = True
-            return error
-        for peer in self.peers:
-            if peer.address == address:
-                Debug.error("Address is equal")
-                error = True
-                return error
-
         # Create peer;
-        peerClient = PeerClient(address)
+        peer = Peer(address)
 
+        # Get external peer public ipv4;
+        external_ip = peer.get_external_ip()
+
+        # Verify max peers;
+        if len(self.peers) >= Params.MAX_PEERS:
+            return Debug.error("Peers: {0} | Max peers  is: {1}!".format(len(self.peers), str(Params.MAX_PEERS)))
+        elif external_ip == address[0]:
+            return Debug.error("External IPv4 is equal to DNS seed peer!")
+        else:
+            # Verify peers address;
+            for peer in self.peers:
+                if peer.address == address:
+                    return Debug.error("Peer address: {0} is equal to new peer: {1}!".format(str(peer.address), str(address)))
+
+            # Debug;
+            Debug.log("Ping command start in {0}.".format(str(address[0])))
+
+            # Ping peer;
+            ping_result = self.ping(address[0])
+
+            if not ping_result:
+                # Ping error;
+                Debug.error("Ping Timeout: peer address {0} removed!".format(str(peer.address)))
+
+                if self.peers:
+                    # Remove peer address;
+                    self.peers.remove(peer)
+
+            else:
+
+                # Debug;
+                Debug.log("Ping sucess.")
+
+                # Connect peer;
+                connect_error = peer.connect()
+
+                if not connect_error:
+
+                    # Verify peer network protocol;
+                    status_peer = self.verify_peer(peer)
+
+                    if status_peer:
+
+                        # Debug;
+                        Debug.log("Adding Peer: {0}".format(str(address)))
+
+                        # Add peer in list;
+                        self.peers.append(peer)
+
+                    else:
+                        Debug.error("Status peer error!")
+
+    def verify_peer(self, peer):
+        # Vars;
+        status_peer = True
+
+        # Send message;
+        peer.send_message("bitaiir")
+
+        # Receive message;
+        received_message = peer.receive_message()
+
+        if received_message != "bitaiir":
+            status_peer = False
+
+        return status_peer
+
+    def ping(self, address):
         try:
-            # Connect peer;
-            peerClient.connect()
+            # Objects;
+            ping = Ping()
+
+            # Create ping command;
+            ping_result = ping.command_ping(address, 5, 1000)
+
+            return ping_result
 
         except Exception as error:
-            Debug.error("Connect to {0}: {1}".format(str(address), str(error)))
-            error = True
-            return error
-
-        Debug.log("Adding Peer: {0}".format(str(address)))
-
-        self.peers.append(peerClient)
-
-        error = False
-
-        return error
-
-    def send_messagel(self, message):
-        for peer in self.peers:
-            try:
-                peer.send_message(message)
-            except:
-                self.peers.remove(peer)
-
-    def receive_message(self):
-        messages = []
-        for peer in self.peers:
-            try:
-                message = peer.receive_message()
-                messages.append((peer.address, message))
-            except:
-                self.peers.remove(peer)
-        return messages
-
-    def ping_all(self):
-        now = int(time.time())
-        if now % Params.PING_INTERVAL != 0:
-            return
-        for peer in self.peers:
-            if now - peer.last_ping > Params.PING_INTERVAL:
-                try:
-                    peer.send_message("ping")
-                    time.sleep(1)
-                    peer.receive_message()
-                    time.sleep(1)
-                    peer.last_ping = now
-                except Exception as error:
-                    Debug.error("[PING] Peer Address {0} removed! Error: {1}.".format(str(peer.address), str(error)))
-                    self.peers.remove(peer)
+            Debug.error("Ping: error: {0}.".format(str(error)))
