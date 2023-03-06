@@ -46,7 +46,7 @@ class PeerManager:
 
             if not ping_result:
                 # Ping error;
-                Debug.error("Ping Timeout: peer address {0} removed!".format(str(peer.address)))
+                Debug.error("Ping Timeout: peer address {0} removed!".format(str(ip_address)))
 
                 if self.peers:
                     # Remove peer address;

@@ -33,7 +33,7 @@ class PeerListen:
             Debug.log("New connection: {0}".format(str(address)))
 
             # Add peer;
-            peer_manager.add_peer(peer.address, "listen")
+            peer_manager.add_peer(address, "listen")
 
 
 
