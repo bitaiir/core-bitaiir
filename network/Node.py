@@ -3,6 +3,7 @@ from tools.Debug import Debug
 from network.peers.PeerDiscovery import PeerDiscovery
 from network.peers.PeerManager import PeerManager
 from network.peers.PeerListen import PeerListen
+from network.peers import Params
 import threading
 import pyfiglet
 import time
@@ -69,7 +70,7 @@ class Node:
                 peer_manager.add_peer(address, "discovery")
 
             # Sleep;
-            time.sleep(5)
+            time.sleep(Params.PING_INTERVAL)
 
 
 if __name__ == "__main__":

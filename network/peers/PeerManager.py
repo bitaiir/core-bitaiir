@@ -87,13 +87,13 @@ class PeerManager:
         if peer_type == "discovery":
 
             # Receive message;
-            received_message = peer.receive_message()
+            received_message = peer.receive_message_listen()
 
             if received_message != "bitaiir":
                 status_peer = False
         else:
             # Send message;
-            peer.send_message("bitaiir")
+            peer.send_message_listen("bitaiir")
 
         return status_peer
 

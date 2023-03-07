@@ -1,5 +1,5 @@
 # Imports
-from network.peers.tests import Params
+from network.peers import Params
 from tools.LocalAddress import LocalAddress
 from tools.ExternalAddress import ExternalAddress
 from tools.Debug import Debug
@@ -43,6 +43,9 @@ class Peer:
             self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.socket.settimeout(5)
             self.socket.connect(self.address)
+
+            # Debug log;
+            Debug.log("New connection: {0}".format(str(self.address)))
 
             return connect_error
 
