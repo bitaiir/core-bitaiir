@@ -1,6 +1,6 @@
 # Imports
-from network.peers.tests.PeerClient import PeerClient
-from network.peers.tests import Params
+from tests.test_network import PeerClient
+from tests.test_network import Params
 from tools.ExternalAddress import ExternalAddress
 from tools.Debug import Debug
 import time
@@ -44,7 +44,7 @@ class PeerManager:
             error = True
             return error
 
-        Debug.log("Adding Peer: {0}".format(str(address)))
+        Debug.log("Adding peer: {0}".format(str(address)))
 
         self.peers.append(peerClient)
 
@@ -82,5 +82,5 @@ class PeerManager:
                     time.sleep(1)
                     peer.last_ping = now
                 except Exception as error:
-                    Debug.error("[PING] Peer Address {0} removed! Error: {1}.".format(str(peer.address), str(error)))
+                    Debug.error("[PING] peer Address {0} removed! Error: {1}.".format(str(peer.address), str(error)))
                     self.peers.remove(peer)

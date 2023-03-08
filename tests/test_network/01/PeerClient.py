@@ -1,5 +1,5 @@
 # Imports
-from network.peers.tests import Params
+from tests.test_network import Params
 from tools.Debug import Debug
 import socket
 

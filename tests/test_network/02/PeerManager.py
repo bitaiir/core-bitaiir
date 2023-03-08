@@ -3,7 +3,6 @@ from network.peers import Params
 from network.peers.Peer import Peer
 from tools.Debug import Debug
 from tools.Ping import Ping
-import time
 
 
 class PeerManager:
@@ -36,7 +35,7 @@ class PeerManager:
             # Verify peers address;
             for peer in self.peers:
                 if peer.address == address:
-                    return Debug.error("Peer address: {0} is equal to new peer: {1}!".format(str(peer.address), str(address)))
+                    return Debug.error("peer address: {0} is equal to new peer: {1}!".format(str(peer.address), str(address)))
 
             # Debug;
             Debug.log("Ping command start in {0}.".format(str(ip_address)))
@@ -72,7 +71,7 @@ class PeerManager:
                     if status_peer:
 
                         # Debug;
-                        Debug.log("Adding Peer: {0}".format(str(address)))
+                        Debug.log("Adding peer: {0}".format(str(address)))
 
                         # Add peer in list;
                         self.peers.append(peer)

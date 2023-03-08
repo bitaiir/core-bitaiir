@@ -1,7 +1,7 @@
 # Imports
-from network.peers.tests.PeerDiscovery import PeerDiscovery
-from network.peers.tests.PeerManager import PeerManager
-from network.peers.tests.PeerServer import PeerServer
+from tests.test_network import PeerDiscovery
+from tests.test_network import PeerManager
+from tests.test_network import PeerServer
 from tools.Debug import Debug
 import threading
 import time
