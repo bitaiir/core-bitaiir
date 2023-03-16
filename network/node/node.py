@@ -1,9 +1,8 @@
 # Imports
 from network.peer.peer_discovery import PeerDiscovery
+from tools.external_address import ExternalAddress
 from network.peer.peer import Peer
 from tools.logger import Logger
-from network.params import params
-import logging
 import socket
 import threading
 import time
@@ -66,26 +65,32 @@ class Node(Peer):
             for peer in new_peers:
 
                 # Vars;
+                external_ip = ExternalAddress.getExternalAddress
                 host = peer[0]
                 port = peer[1]
 
                 # Create peer;
                 peer = Peer(host, port)
 
-                # Tries to connect to a node from the peer list;
-                try:
-                    # Connect client connection;
-                    self.client_socket.connect((peer.host, peer.port))
-                    self.logger.print_logger("info", f"Outbound connection established with {peer.host}:{peer.port}")
+                if host == external_ip:
+                    self.logger.print_logger("error", f"It is not possible to connect to peer {host} and the IP is the same as your external address {external_ip}.")
 
-                    # Manage connection;
-                    self.handle_client_server()
+                else:
 
-                except:
-                    self.logger.print_logger("error", f"Could not connect with {peer.host}:{peer.port}")
+                    # Tries to connect to a node from the peer list;
+                    try:
+                        # Connect client connection;
+                        self.client_socket.connect((peer.host, peer.port))
+                        self.logger.print_logger("info", f"Outbound connection established with {peer.host}:{peer.port}")
 
-                # Sleep and try again;
-                time.sleep(10)
+                        # Manage connection;
+                        self.handle_client_server()
+
+                    except:
+                        self.logger.print_logger("error", f"Could not connect with {peer.host}:{peer.port}")
+
+                    # Sleep and try again;
+                    time.sleep(10)
 
     def handle_client_server(self):
         # Lógica de comunicação do cliente com o servidor
