@@ -64,15 +64,18 @@ class Node(Peer):
             # Manage new peers;
             for peer in new_peers:
 
+                # Objects;
+                external_ip = ExternalAddress()
+
                 # Vars;
-                external_ip = ExternalAddress.getExternalAddress
+                get_external_ip = external_ip.getExternalAddress()
                 host = peer[0]
                 port = peer[1]
 
                 # Create peer;
                 peer = Peer(host, port)
 
-                if host == external_ip:
+                if host == get_external_ip:
                     self.logger.print_logger("error", f"It is not possible to connect to peer {host} and the IP is the same as your external address {external_ip}.")
 
                 else:
