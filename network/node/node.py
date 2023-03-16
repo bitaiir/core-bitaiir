@@ -76,7 +76,7 @@ class Node(Peer):
                 peer = Peer(host, port)
 
                 if host == get_external_ip:
-                    self.logger.print_logger("error", f"It is not possible to connect to peer {host} and the IP is the same as your external address {external_ip}.")
+                    self.logger.print_logger("error", f"It is not possible to connect to peer {host} and the IP is the same as your external address {get_external_ip}.")
 
                 else:
 
