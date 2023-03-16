@@ -1,11 +1,13 @@
 # Imports
-from tools.Debug import Debug
+from tools.logger import Logger
 import socket
 
 
 class LocalAddress:
 
     def getLocalAddress(self):
+        # Objects;
+        logger = Logger("local_address", "local_address.log", "debug")
 
         # Socket
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -16,9 +18,10 @@ class LocalAddress:
             local_ip = s.getsockname()[0]
         except Exception as error:
             local_ip = "127.0.0.1"
-            Debug.error(str(error))
+            logger.print_logger("error", str(error))
         finally:
             s.close()
+
         return local_ip
 
 # # Debug

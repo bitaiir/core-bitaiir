@@ -1,6 +1,6 @@
 # Imports
 from tools.Debug import Debug
-from tools.LocalAddress import LocalAddress
+from tools.local_address import LocalAddress
 from network.peers.PeerManager import PeerManager
 from network.peers.Peer import Peer
 

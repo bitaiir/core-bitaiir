@@ -1,6 +1,6 @@
 # Imports
 from tests.test_network import Params
-from tools.LocalAddress import LocalAddress
+from tools.local_address import LocalAddress
 from tools.Debug import Debug
 import socket
 

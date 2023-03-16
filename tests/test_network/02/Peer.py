@@ -1,7 +1,7 @@
 # Imports
 from network.peers import Params
-from tools.LocalAddress import LocalAddress
-from tools.ExternalAddress import ExternalAddress
+from tools.local_address import LocalAddress
+from tools.external_address import ExternalAddress
 from tools.Debug import Debug
 import socket
 

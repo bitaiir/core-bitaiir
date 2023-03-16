@@ -1,5 +1,5 @@
 # Imports
-from tools.LocalAddress import LocalAddress
+from tools.local_address import LocalAddress
 
 # Vars
 localAddress = LocalAddress()  # Get local ip address;

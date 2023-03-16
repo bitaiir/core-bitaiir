@@ -1,7 +1,7 @@
 # Imports
 from tests.test_network import PeerClient
 from tests.test_network import Params
-from tools.ExternalAddress import ExternalAddress
+from tools.external_address import ExternalAddress
 from tools.Debug import Debug
 import time
 

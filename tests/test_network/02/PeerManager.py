@@ -2,7 +2,7 @@
 from network.peers import Params
 from network.peers.Peer import Peer
 from tools.Debug import Debug
-from tools.Ping import Ping
+from tools.ping import Ping
 
 
 class PeerManager:

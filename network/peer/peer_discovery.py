@@ -1,6 +1,6 @@
 # Imports
-from network.params import Params
-from tools.Debug import Debug
+from network.params import params
+import logging
 import random
 import dns.resolver
 
@@ -8,7 +8,7 @@ import dns.resolver
 class PeerDiscovery:
 
     def __init__(self):
-        self.seeds = Params.DNS_SEEDS
+        self.seeds = params.DNS_SEEDS
         self.resolver = dns.resolver.Resolver()
         self.resolver.timeout = 5
         self.resolver.lifetime = 5
@@ -18,10 +18,10 @@ class PeerDiscovery:
         try:
             answer = self.resolver.resolve(seed, "A")
             for record in answer:
-                Debug.log("Resolver add new peer address: {0}:{1}.".format(str(record), str(Params.DEFAULT_PORT)))
-                addresses.append((str(record), Params.DEFAULT_PORT))
+                logging.info("Resolver add new peer address: {0}:{1}.".format(str(record), str(params.DEFAULT_PORT)))
+                addresses.append((str(record), params.DEFAULT_PORT))
         except Exception as error:
-            Debug.error("Resolver seed: {0}".format(str(error)))
+            logging.error("Resolver seed: {0}".format(str(error)))
             pass
         return addresses
 
@@ -40,4 +40,4 @@ class PeerDiscovery:
         random.shuffle(addresses)
 
         # Return with max peers rule;
-        return addresses[:Params.MAX_PEERS]
+        return addresses[:params.MAX_PEERS]

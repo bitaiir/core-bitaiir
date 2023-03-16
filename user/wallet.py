@@ -1,11 +1,14 @@
+from ecdsa.util import sigencode_der
 import codecs
 import hashlib
 import ecdsa
 import random
-import secrets
 import time
 import base58
+import base64
 import binascii
+import os
+import re
 
 
 class Wallet:
@@ -36,7 +39,8 @@ class Wallet:
 
     def __init_pool(self):
         for i in range(self.POOL_SIZE):
-            random_byte = secrets.randbits(8)
+            random_bytes = os.urandom(1)
+            random_byte = int.from_bytes(random_bytes, byteorder="big")
             self.__seed_byte(random_byte)
         time_int = int(time.time())
         self.__seed_int(time_int)
@@ -147,9 +151,8 @@ class Wallet:
         return b58_string
 
     def privatekey_to_WIF(self, private_key):
-
        # extended_key = "80" + private_key # Bitcoin
-        extended_key = "fe" + private_key
+        extended_key = "fe" + private_key # BitAiir
         first_sha256 = hashlib.sha256(binascii.unhexlify(extended_key)).hexdigest()
         second_sha256 = hashlib.sha256(binascii.unhexlify(first_sha256)).hexdigest()
 
@@ -161,6 +164,76 @@ class Wallet:
 
         return WIF
 
+    def sign_message(self, private_key, message):
+        sk = ecdsa.SigningKey.from_string(bytes.fromhex(private_key), curve=ecdsa.SECP256k1)
+        signature = sk.sign(message.encode())
+        return base64.b64encode(signature).decode('utf-8')
+
+    def verify_sign(self, public_key, message, signature):
+        # Converter a mensagem para hash SHA-256
+        hash_mensagem = hashlib.sha256(message.encode()).digest()
+
+        # Decodificar a assinatura de base64
+        signature = base64.b64decode(signature)
+
+        # Public key verify
+        vk = ecdsa.VerifyingKey.from_string(public_key.decode('utf-8'), curve=ecdsa.SECP256k1)
+
+        try:
+            # Verificar a assinatura usando a chave pública
+            return vk.verify(signature, hash_mensagem, sigdecode=ecdsa.util.sigdecode_der)
+        except ecdsa.BadSignatureError:
+            # A assinatura é inválida
+            return False
+
+    # def sign_transaction(self, tx, private_key):
+    #     private_key_bytes = codecs.decode(private_key, 'hex')
+    #     tx_bytes = codecs.decode(tx, 'hex')
+    #
+    #     # Calculate the hash of the transaction
+    #     tx_hash = hashlib.sha256(hashlib.sha256(tx_bytes).digest()).digest()
+    #
+    #     # Sign the hash using the private key
+    #     sk = ecdsa.SigningKey.from_string(private_key_bytes, curve=ecdsa.SECP256k1)
+    #     signature = sk.sign(tx_hash, hashfunc=hashlib.sha256)
+    #
+    #     # Encode the signature in DER format
+    #     der_signature = ecdsa.util.sigencode_der_canonize(*signature)
+    #
+    #     # Append the hash type to the signature
+    #     hash_type = b"01"
+    #     signature_with_hash_type = der_signature + hash_type
+    #
+    #     # Add the signature to the transaction
+    #     tx_signed_bytes = tx_bytes + signature_with_hash_type
+    #     tx_signed_hex = codecs.encode(tx_signed_bytes, 'hex').decode('utf-8')
+    #
+    #     return tx_signed_hex
+    #
+    # def verify_transaction(self, tx_signed, public_key):
+    #     public_key_bytes = codecs.decode(public_key, 'hex')
+    #     tx_signed_bytes = codecs.decode(tx_signed, 'hex')
+    #
+    #     # Extract the signature and hash type from the signed transaction
+    #     signature = tx_signed_bytes[-73:-1]
+    #     hash_type = tx_signed_bytes[-1]
+    #
+    #     # Remove the signature and hash type from the transaction
+    #     tx_bytes = tx_signed_bytes[:-73]
+    #
+    #     # Calculate the hash of the transaction
+    #     tx_hash = hashlib.sha256(hashlib.sha256(tx_bytes).digest()).digest()
+    #
+    #     # Verify the signature using the public key
+    #     vk = ecdsa.VerifyingKey.from_string(public_key_bytes, curve=ecdsa.SECP256k1)
+    #
+    #     try:
+    #         signature = ecdsa.util.sigdecode_der(signature, vk.pubkey.verifying_curve.order)
+    #         valid_signature = vk.verify(signature, tx_hash, hashfunc=hashlib.sha256)
+    #         return valid_signature
+    #     except ecdsa.BadSignatureError:
+    #         return False
+
     def generateWallet(self):
         private_key = self.generate_key()
         wallet_address = self.generate_address(private_key)
@@ -169,7 +242,14 @@ class Wallet:
 
 
 if __name__ == "__main__":
-     wallet = Wallet()
-     address, address_compressed, private_key = wallet.generateWallet()
-     print("Private Key: {0}\nAddress: {1}\nAddress Compressed: {2}".format(private_key, address, address_compressed))
-     print("WIF: {0}".format(wallet.privatekey_to_WIF(private_key).decode('utf-8')))
+    wallet = Wallet()
+    # address, address_compressed, private_key = wallet.generateWallet()
+    # print("Private Key: {0}\nAddress: {1}\nAddress Compressed: {2}".format(private_key, address, address_compressed))
+    # print("WIF: {0}".format(wallet.privatekey_to_WIF(private_key).decode('utf-8')))
+
+    message = "Hello GPT"
+    address = "13rmkeG6q7wguJb8Lw6LhdUBbaVSEbA7vN"
+    private_key = "442db46ca1e922159529111533398760d19e46c5fa289d3d5a7b2bdbe6a15974"
+
+    print(wallet.private_to_public(private_key))
+
