@@ -1,6 +1,5 @@
 # Imports
 from network.peer.peer_discovery import PeerDiscovery
-from tools.external_address import ExternalAddress
 from network.peer.peer import Peer
 from tools.logger import Logger
 import socket
@@ -14,6 +13,9 @@ class Node(Peer):
         # Objects
         super().__init__(host, port)
         self.logger = Logger("node", "node.log", "debug")
+
+        # Debug;
+        self.logger.print_logger("info", "Starting Node...")
 
         # Sockets;
         self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -41,12 +43,29 @@ class Node(Peer):
             # Accept incoming connection from server;
             client_socket, client_address = self.server_socket.accept()
 
-            # Debug;
-            self.logger.print_logger("info", f"Incoming connection received from {client_address[0]}:{client_address[1]}")
+            host = client_address[0]
+            port = client_address[1]
 
-            # Starts server communication thread;
-            server_thread = threading.Thread(target=self.handle_server_client, args=(client_socket,))
-            server_thread.start()
+            # Create peer;
+            peer = Peer(host, port)
+
+            # Verify peer;
+            peer_status = peer.verify_peer()
+
+            if peer_status:
+
+                # Debug;
+                self.logger.print_logger("info",
+                                         f"Incoming connection received from {client_address[0]}:{client_address[1]}")
+
+                # Add peer in database and save;
+                peer.add_peer()
+
+                # Create thread;
+                server_thread = threading.Thread(target=self.handle_server_client, args=(client_socket,))
+
+                # Starts thread server communication;
+                server_thread.start()
 
     def handle_server_client(self, client_socket):
         # Server communication logic with the client;
@@ -63,31 +82,27 @@ class Node(Peer):
 
             # Manage new peers;
             for peer in new_peers:
-
-                # Objects;
-                external_ip = ExternalAddress()
-
                 # Vars;
-                get_external_ip = external_ip.getExternalAddress()
                 host = peer[0]
                 port = peer[1]
 
                 # Create peer;
                 peer = Peer(host, port)
 
-                if host == get_external_ip:
-                    # Debug;
-                    self.logger.print_logger("error", f"It is not possible to connect to peer {host} and the IP is the same as your external address {get_external_ip}.")
+                # Verify peer;
+                peer_status = peer.verify_peer()
 
-                    # Sleep and try again;
-                    time.sleep(10)
-
-                else:
+                if peer_status:
 
                     # Tries to connect to a node from the peer list;
                     try:
                         # Connect client connection;
                         self.client_socket.connect((peer.host, peer.port))
+
+                        # Add peer in database and save;
+                        peer.add_peer()
+
+                        # Debug;
                         self.logger.print_logger("info", f"Outbound connection established with {peer.host}:{peer.port}")
 
                         # Manage connection;
@@ -96,8 +111,8 @@ class Node(Peer):
                     except:
                         self.logger.print_logger("error", f"Could not connect with {peer.host}:{peer.port}")
 
-                    # Sleep and try again;
-                    time.sleep(10)
+            # Sleep and try again;
+            time.sleep(10)
 
     def handle_client_server(self):
         # Lógica de comunicação do cliente com o servidor
