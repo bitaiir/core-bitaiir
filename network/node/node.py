@@ -1,5 +1,6 @@
 # Imports
 from network.peer.peer_discovery import PeerDiscovery
+from database.database import Database
 from network.peer.peer import Peer
 from tools.logger import Logger
 import socket
@@ -10,9 +11,12 @@ import time
 class Node(Peer):
 
     def __init__(self, host, port):
-        # Objects
         super().__init__(host, port)
+        # Objects
         self.logger = Logger("node", "node.log", "debug")
+
+        # Vars;
+        self.delay_discovery = 30
 
         # Debug;
         self.logger.print_logger("info", "Starting Node...")
@@ -39,6 +43,12 @@ class Node(Peer):
         client_thread.join()
 
     def handle_server_connections(self):
+        # Objects;
+        database = Database()
+
+        # Connect database;
+        database.connect()
+
         while True:
             # Accept incoming connection from server;
             client_socket, client_address = self.server_socket.accept()
@@ -50,7 +60,7 @@ class Node(Peer):
             peer = Peer(host, port)
 
             # Verify peer;
-            peer_status = peer.verify_peer()
+            peer_status = peer.verify_peer(database)
 
             if peer_status:
 
@@ -59,7 +69,7 @@ class Node(Peer):
                                          f"Incoming connection received from {client_address[0]}:{client_address[1]}")
 
                 # Add peer in database and save;
-                peer.add_peer()
+                database.add_peer(peer.host, peer.port)
 
                 # Create thread;
                 server_thread = threading.Thread(target=self.handle_server_client, args=(client_socket,))
@@ -72,6 +82,12 @@ class Node(Peer):
         pass
 
     def handle_client_connections(self):
+        # Objects;
+        database = Database()
+
+        # Connect database;
+        database.connect()
+
         while True:
 
             # Search peers discovery;
@@ -90,7 +106,7 @@ class Node(Peer):
                 peer = Peer(host, port)
 
                 # Verify peer;
-                peer_status = peer.verify_peer()
+                peer_status = peer.verify_peer(database)
 
                 if peer_status:
 
@@ -100,7 +116,7 @@ class Node(Peer):
                         self.client_socket.connect((peer.host, peer.port))
 
                         # Add peer in database and save;
-                        peer.add_peer()
+                        database.add_peer(peer.host, peer.port)
 
                         # Debug;
                         self.logger.print_logger("info", f"Outbound connection established with {peer.host}:{peer.port}")
@@ -108,11 +124,11 @@ class Node(Peer):
                         # Manage connection;
                         self.handle_client_server()
 
-                    except:
-                        self.logger.print_logger("error", f"Could not connect with {peer.host}:{peer.port}")
+                    except OSError as error:
+                        self.logger.print_logger("warning", f"Could not connect with {peer.host}:{peer.port}! Error: {error}")
 
             # Sleep and try again;
-            time.sleep(10)
+            time.sleep(self.delay_discovery)
 
     def handle_client_server(self):
         # Lógica de comunicação do cliente com o servidor

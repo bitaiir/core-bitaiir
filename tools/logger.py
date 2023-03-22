@@ -13,7 +13,7 @@ class Logger:
     def print_logger(self, message_type, message):
         # Objects;
         logger = logging.getLogger(self.user)
-        handler = logging.FileHandler(self.log_name)
+        handler = logging.FileHandler(f"files/logs/{self.log_name}")
 
         # Verify levels;
         if self.level == "debug":

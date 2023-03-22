@@ -14,7 +14,7 @@ class Core:
         self.show_logo()
 
         # Objects;
-        self.logger = Logger("node", "node.log", "debug")
+        self.logger = Logger("core", "core.log", "debug")
 
         # Debug;
         self.logger.print_logger("info", "Starting Core...")
