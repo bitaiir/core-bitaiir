@@ -71,8 +71,12 @@ class Node(Peer):
                 # Add peer in database and save;
                 database.add_peer(peer.host, peer.port)
 
+                # Check connections;
+                check_server_connection = threading.Thread(target=peer.server_send_ping, args=(client_socket,))
+
                 # Start verifying ping connection in socket;
-                peer.server_send_ping(client_socket)
+                check_server_connection.start()
+                check_server_connection.join()
 
                 # Create thread;
                 server_thread = threading.Thread(target=self.handle_server_client, args=(client_socket,))
@@ -124,8 +128,13 @@ class Node(Peer):
                         # Debug;
                         self.logger.print_logger("info", f"Outbound connection established with {peer.host}:{peer.port}")
 
+                        # Check connections;
+                        check_client_connection = threading.Thread(target=peer.client_send_ping,
+                                                                   args=(self.client_socket,))
+
                         # Start verifying pong connection in socket;
-                        peer.client_send_ping(self.client_socket)
+                        check_client_connection.start()
+                        check_client_connection.join()
 
                         # Manage connection;
                         self.handle_client_server()

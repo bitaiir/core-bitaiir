@@ -42,28 +42,67 @@ class Peer:
         return peer_status
 
     def server_send_ping(self, socket):
-        # Enviar mensagem "ping" para o cliente
-        socket.send("ping".encode())
+        try:
+            while True:
+                # Send "ping" message to client;
+                socket.send("ping".encode())
 
-        # Esperar resposta "pong" do cliente
-        data = socket.recv(1024)
+                # Set timeout to socket;
+                socket.settimeout(5.0)
 
-        if data.decode() == "pong":
-            print(f"Resposta 'pong' recebida do cliente {self.host}")
-        else:
-            print(f"Resposta inválida recebida do cliente {self.host}")
+                # Wait answer "pong" from client;
+                response = socket.recv(1024)
+
+                # If there is no answer, the connection has dropped;
+                if not response:
+                    # Debug;
+                    self.logger.print_logger("info", "Connection terminated by the other side.")
+                    break
+
+                # Verify response;
+                if response.decode() == "pong":
+                    # Debug;
+                    self.logger.print_logger("info", f"Received 'pong' response from client: {self.host}!")
+                else:
+                    # Debug;
+                    self.logger.print_logger("warning", f"Received invalid response from client: {self.host}!")
+
+                # Set time sleep;
+                time.sleep(30)
+
+        except socket.timeout:
+            # Debug;
+            self.logger.print_logger("error", "Timeout: connection may have been lost.")
+
+        except Exception as error:
+            # Debug;
+            self.logger.print_logger("error", f"Exception: {error}")
 
     def client_send_ping(self, socket):
-        # Receber mensagem "ping" do servidor
-        data = socket.recv(1024)
+        while True:
+            try:
+                # Receive "ping" message from server;
+                data = socket.recv(1024)
 
-        if data.decode() == "ping":
-            print("Mensagem 'ping' recebida do servidor")
+                # Verify message;
+                if data.decode() == "ping":
+                    # Debug;
+                    self.logger.print_logger("info", "Message 'ping' received from server.")
 
-            # Responder com mensagem "pong"
-            socket.send("pong".encode())
+                    # Send "pong" message;
+                    socket.send("pong".encode())
 
-            print("Mensagem 'pong' enviada para o servidor")
+                    # Debug;
+                    self.logger.print_logger("info", "Message 'pong' send to server.")
 
-        else:
-            print("Mensagem inválida recebida do servidor")
+                else:
+                    # Debug;
+                    self.logger.print_logger("error", "Message invalid received from server.")
+
+                # Set time sleep;
+                time.sleep(1)
+
+            except Exception as error:
+                # Debug;
+                self.logger.print_logger("error", f"Exception: {error}")
+                break
