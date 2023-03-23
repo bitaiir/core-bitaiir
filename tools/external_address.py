@@ -21,14 +21,18 @@ class ExternalAddress:
             time.sleep(5)
 
             # Filter the response with a regex for an IPv4 address
-            ip = re.search("(?:[0-9]{1,3}\.){3}[0-9]{1,3}", response).group()
+            ip_match = re.search("(?:[0-9]{1,3}\.){3}[0-9]{1,3}", response)
+
+            if ip_match is not None:
+                ip = ip_match.group()
+            else:
+                raise Exception("Failed to retrieve external IP address")
 
         except Exception as error:
             ip = "127.0.0.1"
             logger.print_logger("error", str(error))
 
         return ip
-
 # # Debug
 # if __name__ == "__main__":
 #     externalAddress = ExternalAddress()

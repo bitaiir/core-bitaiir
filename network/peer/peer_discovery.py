@@ -8,6 +8,7 @@ import dns.resolver
 class PeerDiscovery:
 
     def __init__(self):
+        # Configs;
         self.seeds = params.DNS_SEEDS
         self.resolver = dns.resolver.Resolver()
         self.resolver.timeout = 5
@@ -23,7 +24,7 @@ class PeerDiscovery:
         try:
             answer = self.resolver.resolve(seed, "A")
             for record in answer:
-                self.logger.print_logger("info", "Resolver add new peer address: {0}:{1}.".format(str(record), str(params.DEFAULT_PORT)))
+                self.logger.print_logger("info", "Resolving new peer address: {0}:{1}.".format(str(record), str(params.DEFAULT_PORT)))
                 addresses.append((str(record), params.DEFAULT_PORT))
 
         except Exception as error:

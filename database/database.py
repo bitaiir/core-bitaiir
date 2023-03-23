@@ -105,7 +105,7 @@ class Database:
                 cursor.execute("CREATE TABLE peers (id INTEGER PRIMARY KEY, ip TEXT, port INTEGER)")
 
                 # Debug;
-                self.logger.print_logger("info", "Table 'peers' created successfully")
+                self.logger.print_logger("info", "Table 'peers' created successfully!")
 
             # Insert new peer in database;
             cursor.execute(f"INSERT INTO peers (ip, port) VALUES ('{ip}', {port})")
@@ -114,7 +114,7 @@ class Database:
             self.connection.commit()
 
             # Debug;
-            self.logger.print_logger("info", f"Peer {ip}:{port} added successfully")
+            self.logger.print_logger("info", f"Peer {ip}:{port} added successfully!")
 
         except sqlite3.Error as error:
             # Rollback changes in database connection;
@@ -141,7 +141,7 @@ class Database:
             self.connection.commit()
 
             # Debug;
-            self.logger.print_logger("info", f"Peer {ip}:{port} removed successfully")
+            self.logger.print_logger("info", f"Peer {ip}:{port} removed successfully!")
 
         except sqlite3.Error as error:
             # Rollback changes in database connection;

@@ -71,6 +71,9 @@ class Node(Peer):
                 # Add peer in database and save;
                 database.add_peer(peer.host, peer.port)
 
+                # Start verifying ping connection in socket;
+                peer.server_send_ping(client_socket)
+
                 # Create thread;
                 server_thread = threading.Thread(target=self.handle_server_client, args=(client_socket,))
 
@@ -94,13 +97,13 @@ class Node(Peer):
             peer_discovery = PeerDiscovery()
 
             # Get peers;
-            new_peers = peer_discovery.discover_peers()
+            new_peers_list = peer_discovery.discover_peers()
 
             # Manage new peers;
-            for peer in new_peers:
+            for new_peer in new_peers_list:
                 # Vars;
-                host = peer[0]
-                port = peer[1]
+                host = new_peer[0]
+                port = new_peer[1]
 
                 # Create peer;
                 peer = Peer(host, port)
@@ -121,15 +124,19 @@ class Node(Peer):
                         # Debug;
                         self.logger.print_logger("info", f"Outbound connection established with {peer.host}:{peer.port}")
 
+                        # Start verifying pong connection in socket;
+                        peer.client_send_ping(self.client_socket)
+
                         # Manage connection;
                         self.handle_client_server()
 
                     except OSError as error:
-                        self.logger.print_logger("warning", f"Could not connect with {peer.host}:{peer.port}! Error: {error}")
+                        self.logger.print_logger("warning", f"Could not connect with {peer.host}:{peer.port}!")
 
             # Sleep and try again;
             time.sleep(self.delay_discovery)
 
     def handle_client_server(self):
-        # Lógica de comunicação do cliente com o servidor
+        # Client-to-server communication logic;
         pass
+
