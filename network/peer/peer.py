@@ -1,6 +1,7 @@
 # Imports
 from tools.external_address import ExternalAddress
 from tools.logger import Logger
+from network.params import params
 import time
 
 
@@ -44,6 +45,9 @@ class Peer:
     def server_send_ping(self, socket):
         try:
             while True:
+                # Debug;
+                self.logger.print_logger("info", f"Send 'ping' message to client: {self.host}.")
+
                 # Send "ping" message to client;
                 socket.send("ping".encode())
 
@@ -68,7 +72,7 @@ class Peer:
                     self.logger.print_logger("warning", f"Received invalid response from client: {self.host}!")
 
                 # Set time sleep;
-                time.sleep(30)
+                time.sleep(params.PING_INTERVAL * 60)
 
         except socket.timeout:
             # Debug;
